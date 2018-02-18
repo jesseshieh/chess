@@ -2,6 +2,7 @@ defmodule ChessWeb.GameController do
   use ChessWeb, :controller
 
   alias Chess.Store.Game
+  alias Chess.Auth.User
 
   def index(conn, _params) do
     changeset = Game.changeset(%Game{})
@@ -9,7 +10,20 @@ defmodule ChessWeb.GameController do
             |> Game.for_user(current_user(conn))
             |> Game.ordered
             |> Repo.all
+
     render(conn, "index.html", games: games, changeset: changeset)
+  end
+
+  def new(conn, _params) do
+    changeset = Game.changeset(%Game{})
+
+    query = from user in "users",
+            where: user.id != ^current_user(conn).id,
+            select: {user.username, user.id}
+
+    opponents = query |> Repo.all
+
+    render(conn, "new.html", changeset: changeset, opponents: opponents)
   end
 
   def create(conn, _params) do
@@ -30,6 +44,7 @@ defmodule ChessWeb.GameController do
 
   def show(conn, %{"id" => id}) do
     game = Repo.get!(Game, id)
+
     render(conn, "show.html", game: game)
   end
 
