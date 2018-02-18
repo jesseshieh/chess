@@ -11,6 +11,7 @@ defmodule Chess.Store.Game do
     field :board, :map
 
     belongs_to :user, Chess.Auth.User
+    belongs_to :opponent, Chess.Auth.User, references: :id
 
     timestamps()
   end
